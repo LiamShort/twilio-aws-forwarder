@@ -1,0 +1,55 @@
+service: twilio-forwarder
+
+provider: 
+  name: aws
+  runtime: python3.6
+  region: ${self:custom.config.region}
+  versionFunctions: false
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup,
+        - logs:PutRetentionPolicy,
+        - logs:CreateLogStream,
+        - logs:PutLogEvents,
+        - logs:DescribeLogStreams,
+        - logs:GetLogEvents
+      Resource: 
+        - arn:aws:logs:*:*:log-group:/aws/*
+    - Effect: Allow
+      Action:
+        - SNS:Publish
+      Resource: 
+        {"Ref": "SNSTopic"}
+
+custom:
+  config: ${file(${self:provider.stage}.yml), file(dev.yml)}
+
+functions:
+  TwilioLambda:
+    name: twilio-forwarder
+    description: Will forward Twilio messages to SNS
+    handler: twilio-forwarder.lambda_handler
+    environment: 
+      snsArn: 
+        {"Ref": "SNSTopic"}
+    events:
+      - http:
+          path: test/twilio-forwarder
+          method: POST
+          integration: lambda
+
+resources:
+  Resources:
+    SNSTopic:
+        Type: AWS::SNS::Topic
+        Properties:
+          DisplayName: SNS for Twilio forwarding
+          TopicName: TwilioSNSTopic
+
+    SNSSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: ${self:custom.config.PhoneNumber}
+        Protocol: sms
+        TopicArn: {"Ref": "SNSTopic"}
