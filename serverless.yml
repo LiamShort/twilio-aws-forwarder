@@ -37,7 +37,18 @@ functions:
       - http:
           path: test/TwilioForwarder
           method: POST
-          integration: lambda
+          response:
+            headers:
+              Content-Type: "'application/xml'"
+            template: $input.path("$")
+            statusCodes:
+                200:
+                    pattern: '' # Default response method
+                    template:
+                      # Your script returns json, so match it here
+                      application/json: $input.path("$.body")
+                    headers:
+                      Content-Type: "'application/xml'"
 
 resources:
   Resources:
