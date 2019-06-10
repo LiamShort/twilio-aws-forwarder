@@ -7,26 +7,30 @@ sns = boto3.client('sns')
 snsArn = os.environ["snsArn"]
 
 def lambda_handler(event, context):
-    
-    data = event["body"]
-    
-    message = {
-        "From": data["From"],
-        "Message": data["Body"]
-    }
-    
-    sns.publish(
+
+    try: 
+        data = event["body"]
+
+        message = {
+            "From": data["From"],
+            "Message": data["Body"]
+        }
+
+        sns_response = sns_publish_func(message)
+        return(sns_response)
+
+
+    except:
+        return{
+            "message": "Incorrect Data Received"
+        }
+
+def sns_publish_func(message):
+
+    sns_response = sns.publish(
         TargetArn=snsArn,
         Message=json.dumps({'default': json.dumps(message)}),
         MessageStructure='json'
     )
 
-    twilioResponse = {
-        "statusCode": 200,
-        "headers": {
-          'Content-Type': 'text/xml',
-        },
-        "body": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
-    }
-    
-    return twilioResponse
+    return(sns_response)
