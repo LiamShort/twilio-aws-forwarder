@@ -37,6 +37,7 @@ functions:
       - http:
           path: test/TwilioForwarder
           method: POST
+          integration: lambda
           response:
             headers:
               Content-Type: "'application/xml'"
