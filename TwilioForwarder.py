@@ -1,8 +1,6 @@
-from __future__ import print_function
 import boto3
 import os
 import json
-from urllib.parse import parse_qs
 
 sns = boto3.client('sns')
 
@@ -10,7 +8,7 @@ snsArn = os.environ["snsArn"]
 
 def lambda_handler(event, context):
     
-    data = parse_qs(event["body"])
+    data = event["body"]
     
     message = {
         "From": data["From"],
