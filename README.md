@@ -17,14 +17,14 @@ The application is deployed to AWS using the Serverless Framework. Download the 
 * **email** - Email messages are forwarded to<br/>
 
 Within the repo of the downloaded source code, run:
-* serverless deploy --aws-profile <INSERT_AWS_PROFILE><br/>
+* **serverless deploy --aws-profile <INSERT_AWS_PROFILE>**<br/>
 
 Once Serverless has finished deploying the application, take a note of the API Gateway Endpoint URL.<br/>
 
 ### Twilio
 
-A Twilio account is required, this can be created at **https://www.twilio.com/**.<br/>
+A Twilio account is required, this can be created at "**https://www.twilio.com/**".<br/>
 
-A number should then be purchased, for a monthly charge of £1 per month, this can be done at https:/**/www.twilio.com/console/phone-numbers/incoming**.<br/>
+A number should then be purchased, for a monthly charge of £1 per month, this can be done at https:/"**/www.twilio.com/console/phone-numbers/incoming**".<br/>
 
-After the phone number is purchased, click into the number and under "Messaging" > "A Message Comes In". Select Webhook from the dropdown menu and insert the API Gateway Endpoint URL into the corresponding field. This will forward all incoming SMS messages to the endpoint.<br/>
+After the phone number is purchased, click into the number and under "**Messaging**" > "**A Message Comes In**". Select Webhook from the dropdown menu and insert the API Gateway Endpoint URL into the corresponding field. This will forward all incoming SMS messages to the endpoint.<br/>
