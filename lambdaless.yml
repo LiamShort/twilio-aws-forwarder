@@ -1,0 +1,118 @@
+# https://apimeister.com/2017/09/13/integrate-api-gateway-with-sns-using-cloudformation.html
+
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  PhoneNumber:
+    Type: String
+  EmailAddress:
+    Type: String
+
+Resources:
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: Twilio Forwarder
+      TopicName: TwilioForwarder
+
+  SNSSMSSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref PhoneNumber
+      Protocol: sms
+      TopicArn: {"Ref": "SNSTopic"}
+
+  SNSEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref EmailAddress
+      Protocol: email
+      TopicArn: {"Ref": "SNSTopic"}
+
+  ApiGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name:
+        Fn::Join:
+          - ""
+          - - Ref: AWS::StackName
+            - "-api"
+
+  GatewayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - apigateway.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: GatewayRolePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+                - sns:Publish
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - logs:PutLogEvents
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+              Resource: "*"
+
+  ApiGatewayPOSTMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: POST
+      Integration:
+        IntegrationHttpMethod: POST
+        PassthroughBehavior: NEVER
+        RequestParameters:
+          integration.request.header.Content-Type: "'application/x-www-form-urlencoded'"
+        RequestTemplates:
+          application/json:
+            Fn::Join:
+              - ""
+              - - 'Action=Publish&TopicArn=$util.urlEncode("'
+                - Ref: SNSTopic
+                - "\")&Message=$util.urlEncode($input.path('$.Body'))"
+                - "&Subject=$util.urlEncode('Message from Twilio')"
+        Type: AWS
+        Credentials:
+          Fn::GetAtt: [ GatewayRole, Arn ]
+        Uri:
+          Fn::Join:
+            - ""
+            - - "arn:aws:apigateway:"
+              - Ref: AWS::Region
+              - ":sns:path//"
+        IntegrationResponses:
+          -
+            StatusCode: 200
+            ResponseTemplates:
+              application/json: |
+                $input.body
+      MethodResponses:
+        -
+          StatusCode: 200
+          ResponseModels:
+            application/json: Empty
+      ResourceId:
+        Fn::GetAtt: [ ApiGatewayRestApi , RootResourceId ]
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ApiGatewayPOSTMethod
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      StageName: prod
