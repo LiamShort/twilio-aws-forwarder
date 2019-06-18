@@ -83,7 +83,7 @@ Resources:
               - ""
               - - 'Action=Publish&TopicArn=$util.urlEncode("'
                 - Ref: SNSTopic
-                - "\")&Message=$util.urlEncode($input.body))"
+                - "\")&Message=$util.urlEncode($input.json('$.Body'))"
                 - "&Subject=$util.urlEncode('Message from Twilio')"
         Type: AWS
         Credentials:
@@ -99,7 +99,7 @@ Resources:
             StatusCode: 200
             ResponseTemplates:
               application/json: |
-                $input.body
+                { "statusCode": 200 }
       MethodResponses:
         -
           StatusCode: 200
