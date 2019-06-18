@@ -78,12 +78,12 @@ Resources:
         RequestParameters:
           integration.request.header.Content-Type: "'application/x-www-form-urlencoded'"
         RequestTemplates:
-          application/json:
+          application/x-www-form-urlencoded:
             Fn::Join:
               - ""
               - - 'Action=Publish&TopicArn=$util.urlEncode("'
                 - Ref: SNSTopic
-                - "\")&Message=$util.urlEncode($input.path('$.Body'))"
+                - "\")&Message=$util.urlEncode($input.body))"
                 - "&Subject=$util.urlEncode('Message from Twilio')"
         Type: AWS
         Credentials:

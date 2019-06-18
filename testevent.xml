@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+   <AccountSid>AC9efdcd9264e24322d10e1c68cba77d36</AccountSid>
+   <ApiVersion>2010-04-01</ApiVersion>
+   <Body>yerdaw</Body>
+   <From>%2B447853971221</From>
+   <FromCity />
+   <FromCountry>GB</FromCountry>
+   <FromState />
+   <FromZip />
+   <MessageSid>SMbbefd6138b48a6f5f7aee2795e352828</MessageSid>
+   <NumMedia>0</NumMedia>
+   <NumSegments>1</NumSegments>
+   <SmsMessageSid>SMbbefd6138b48a6f5f7aee2795e352828</SmsMessageSid>
+   <SmsSid>SMbbefd6138b48a6f5f7aee2795e352828</SmsSid>
+   <SmsStatus>received</SmsStatus>
+   <To>%2B447588741133</To>
+   <ToCity />
+   <ToCountry>GB</ToCountry>
+   <ToState />
+   <ToZip />
+</root>
