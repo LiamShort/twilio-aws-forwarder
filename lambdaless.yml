@@ -12,8 +12,8 @@ Resources:
   SNSTopic:
     Type: AWS::SNS::Topic
     Properties:
-      DisplayName: Twilio Forwarder
-      TopicName: TwilioForwarder
+      DisplayName: Twilio Forwarder2
+      TopicName: TwilioForwarder2
 
   SNSSMSSubscription:
     Type: AWS::SNS::Subscription
@@ -81,9 +81,14 @@ Resources:
           application/x-www-form-urlencoded:
             Fn::Join:
               - ""
-              - - 'Action=Publish&TopicArn=$util.urlEncode("'
+              - - "#foreach( $token in $input.path('$').split('&') )##"
+                - "\n#if( $token.split('=')[0] == 'Body' )##"
+                - "\n#set( $messagetext = $token.split('=')[1] )##"
+                - "\n#end##"
+                - "\n#end##"
+                - "\nAction=Publish&TopicArn=$util.urlEncode(\""
                 - Ref: SNSTopic
-                - "\")&Message=$util.urlEncode($input.body))"
+                - "\")&Message=$messagetext"
                 - "&Subject=$util.urlEncode('Message from Twilio')"
         Type: AWS
         Credentials:
@@ -98,13 +103,16 @@ Resources:
           -
             StatusCode: 200
             ResponseTemplates:
-              application/json: |
-                { "statusCode": 200 }
+              application/xml: |
+                <?xml version="1.0" encoding="UTF-8"?>
+                <Response>
+                    <Message>We got your message, thank you!</Message>
+                </Response>
       MethodResponses:
         -
           StatusCode: 200
           ResponseModels:
-            application/json: Empty
+            application/xml: Empty
       ResourceId:
         Fn::GetAtt: [ ApiGatewayRestApi , RootResourceId ]
       RestApiId: !Ref ApiGatewayRestApi
