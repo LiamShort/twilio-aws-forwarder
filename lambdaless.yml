@@ -124,3 +124,15 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
       StageName: prod
+
+Outputs:
+  AppApi:
+    Description: The API to receive Twilio messages
+    Value:
+      Fn::Join:
+        - ""
+        - - "https://"
+          - !Ref ApiGatewayRestApi
+          - ".execute-api."
+          - !Ref AWS::Region
+          - ".amazonaws.com/prod/"
