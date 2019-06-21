@@ -20,14 +20,14 @@ Resources:
     Properties:
       Endpoint: !Ref PhoneNumber
       Protocol: sms
-      TopicArn: {"Ref": "SNSTopic"}
+      TopicArn: !Ref SNSTopic
 
   SNSEmailSubscription:
     Type: AWS::SNS::Subscription
     Properties:
       Endpoint: !Ref EmailAddress
       Protocol: email
-      TopicArn: {"Ref": "SNSTopic"}
+      TopicArn: !Ref SNSTopic
 
   ApiGatewayRestApi:
     Type: AWS::ApiGateway::RestApi
@@ -35,7 +35,7 @@ Resources:
       Name:
         Fn::Join:
           - ""
-          - - Ref: AWS::StackName
+          - - !Ref AWS::StackName
             - "-api"
 
   GatewayRole:
@@ -87,7 +87,7 @@ Resources:
                 - "\n#end##"
                 - "\n#end##"
                 - "\nAction=Publish&TopicArn=$util.urlEncode(\""
-                - Ref: SNSTopic
+                - !Ref SNSTopic
                 - "\")&Message=$messagetext"
                 - "&Subject=$util.urlEncode('Message from Twilio')"
         Type: AWS
@@ -97,7 +97,7 @@ Resources:
           Fn::Join:
             - ""
             - - "arn:aws:apigateway:"
-              - Ref: AWS::Region
+              - !Ref AWS::Region
               - ":sns:path//"
         IntegrationResponses:
           -
@@ -106,7 +106,7 @@ Resources:
               application/xml: |
                 <?xml version="1.0" encoding="UTF-8"?>
                 <Response>
-                    <Message>We got your message, thank you!</Message>
+                    <Message></Message>
                 </Response>
       MethodResponses:
         -
