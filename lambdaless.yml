@@ -20,14 +20,14 @@ Resources:
     Properties:
       Endpoint: !Ref PhoneNumber
       Protocol: sms
-      TopicArn: {"Ref": "SNSTopic"}
+      TopicArn: !Ref SNSTopic
 
   SNSEmailSubscription:
     Type: AWS::SNS::Subscription
     Properties:
       Endpoint: !Ref EmailAddress
       Protocol: email
-      TopicArn: {"Ref": "SNSTopic"}
+      TopicArn: !Ref SNSTopic
 
   ApiGatewayRestApi:
     Type: AWS::ApiGateway::RestApi
@@ -35,7 +35,7 @@ Resources:
       Name:
         Fn::Join:
           - ""
-          - - Ref: AWS::StackName
+          - - !Ref AWS::StackName
             - "-api"
 
   GatewayRole:
@@ -81,9 +81,14 @@ Resources:
           application/x-www-form-urlencoded:
             Fn::Join:
               - ""
-              - - 'Action=Publish&TopicArn=$util.urlEncode("'
-                - Ref: SNSTopic
-                - "\")&Message=$util.urlEncode($input.json('$.Body'))"
+              - - "#foreach( $token in $input.path('$').split('&') )##"
+                - "\n#if( $token.split('=')[0] == 'Body' )##"
+                - "\n#set( $messagetext = $token.split('=')[1] )##"
+                - "\n#end##"
+                - "\n#end##"
+                - "\nAction=Publish&TopicArn=$util.urlEncode(\""
+                - !Ref SNSTopic
+                - "\")&Message=$messagetext"
                 - "&Subject=$util.urlEncode('Message from Twilio')"
         Type: AWS
         Credentials:
@@ -92,19 +97,22 @@ Resources:
           Fn::Join:
             - ""
             - - "arn:aws:apigateway:"
-              - Ref: AWS::Region
+              - !Ref AWS::Region
               - ":sns:path//"
         IntegrationResponses:
           -
             StatusCode: 200
             ResponseTemplates:
-              application/json: |
-                { "statusCode": 200 }
+              application/xml: |
+                <?xml version="1.0" encoding="UTF-8"?>
+                <Response>
+                    <Message></Message>
+                </Response>
       MethodResponses:
         -
           StatusCode: 200
           ResponseModels:
-            application/json: Empty
+            application/xml: Empty
       ResourceId:
         Fn::GetAtt: [ ApiGatewayRestApi , RootResourceId ]
       RestApiId: !Ref ApiGatewayRestApi
@@ -116,3 +124,15 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
       StageName: prod
+
+Outputs:
+  AppApi:
+    Description: The API to receive Twilio messages
+    Value:
+      Fn::Join:
+        - ""
+        - - "https://"
+          - !Ref ApiGatewayRestApi
+          - ".execute-api."
+          - !Ref AWS::Region
+          - ".amazonaws.com/prod/"
