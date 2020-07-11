@@ -12,8 +12,8 @@ Resources:
   SNSTopic:
     Type: AWS::SNS::Topic
     Properties:
-      DisplayName: Twilio Forwarder2
-      TopicName: TwilioForwarder2
+      DisplayName: Twilio Forwarder
+      TopicName: TwilioForwarder
 
   SNSSMSSubscription:
     Type: AWS::SNS::Subscription
